@@ -1,5 +1,5 @@
-import {modeType} from './type/mode';
-import {matrixOption, MatrixInterface, hitPointFunParams, hitPointOption} from './type/matrix';
+import { modeType } from './type/mode';
+import { matrixOption, MatrixInterface, hitPointFunParams, hitPointOption } from './type/matrix';
 
 type returnType = {
   movePoint(mode: modeType, option: hitPointOption): void;
@@ -7,9 +7,9 @@ type returnType = {
   matrixChange: MatrixInterface;
 };
 
-import {Matrix} from './Matrix';
-import {initContainerLayout, initDom} from './initHtml';
-import {getRandom, getRandomStr} from "./util";
+import { Matrix } from './Matrix';
+import { initContainerLayout, initDom } from './initHtml';
+import { getRandom, getRandomStr } from "./util";
 
 let defaultOption = {
   nameSpace: getRandomStr(8),
@@ -17,9 +17,24 @@ let defaultOption = {
   col: 9,
   images: []
 };
+/**
+ * 预加载函数
+ * @param images 图片数组
+ */
+function preload(images: Array<String>) {
+  for (let i = 0; i < images.length; i++) {
+    const element = images[i];
+    const preimg = document.createElement('div');
+    preimg.style.backgroundImage = `url(${element})`;
+    document.documentElement.appendChild(preimg);
+    setTimeout(() => {
+      document.documentElement.removeChild(preimg);
+    }, 0);
+  }
+}
 
 export function makeMatrixChange(dom: HTMLElement, optionIn: matrixOption): returnType {
-  let option = {...defaultOption, ...optionIn};
+  let option = { ...defaultOption, ...optionIn };
 
   initContainerLayout(option.nameSpace, option.row, option.col);
   let domMatrix = initDom(dom, option.nameSpace, option.row, option.col);
@@ -27,11 +42,13 @@ export function makeMatrixChange(dom: HTMLElement, optionIn: matrixOption): retu
   let ma = new Matrix(option.row, option.col);
   let image = option.images[0];
 
+  preload(option.images);
+
   ma.$on('changeStart', () => {
     image = option.images[getRandom(0, option.images.length - 1)];
   });
 
-  ma.$on('hitPoint', ({point, mode, option}: hitPointFunParams) => {
+  ma.$on('hitPoint', ({ point, mode, option }: hitPointFunParams) => {
     image = option.image ? option.image : image;
     let className = option.className ? option.className : 'defaultChange';
     let classNameIn = '';
